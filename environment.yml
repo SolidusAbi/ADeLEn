@@ -1,0 +1,18 @@
+name: DeepLearning
+channels:
+  - defaults
+dependencies:
+  - pytorch
+  - torchvision
+  - scikit-learn
+  - pandas
+  - matplotlib
+  - cudatoolkit=11.3
+  - ipykernel
+  - tqdm
+  - tensorboard
+  - ipywidgets
+  - seaborn
+  - imbalanced-learn
+  - captum
+prefix: /home/abian/Workspace/Anaconda/envs/DeepLearning
