@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 class AnomalyMNIST(Dataset):
     ''' 
         Anomaly detection dataset for MNIST. The dataset is composed by the normal samples (1) and
-        the anomaly samples (7). The known anomalies are anotated by the label 1, while the unknown
-        anomalies are anotated by the label 0.
+        the anomaly samples (7). The known anomalies are anotated by the label 1, while the normal and
+        `unknown' anomalies samples are anotated by the label 0.
 
         Args:
             root: str

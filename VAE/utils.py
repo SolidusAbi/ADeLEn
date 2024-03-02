@@ -31,7 +31,8 @@ class SGVBL(nn.Module):
         for layer in self.variational_layers:
             kl += layer.kl_reg(target)
             
-        return self.loss(input, output) * self.train_size + kl_weight * kl
+        # return self.loss(input, output) * self.train_size + kl_weight * kl
+        return self.loss(input, output) + kl_weight * kl
 
 import math, torch
 def cosine_scheduler(timesteps, s=8e-3):
