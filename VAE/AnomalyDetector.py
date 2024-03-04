@@ -13,17 +13,16 @@ class AnomalyDetector(nn.Linear, VariationalLayer):
         super(AnomalyDetector, self).__init__(in_features, out_features, bias)
         self.log_sigma_weight = Parameter(torch.Tensor(out_features, in_features))
         self.log_sigma_bias = Parameter(torch.Tensor(out_features))
+        
         torch.nn.init.xavier_uniform_(self.log_sigma_weight)
         self.log_sigma_bias.data.fill_(-5)
-        self.mu, self.sigma = None, None
-
+        
         self.sigma_anomaly = sigma_anomaly
+        self.mu, self.sigma = None, None
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         mu = F.linear(x, self.weight, self.bias) 
-        # sigma = torch.exp(F.linear(x, self.log_sigma_weight))
         # sigma = torch.exp(F.linear(x, self.log_sigma_weight, self.log_sigma_bias))
-        # sigma = torch.exp(0.5 * F.linear(x*x, self.log_sigma_weight, self.log_sigma_bias))
         sigma = torch.exp(0.5 * F.linear(x, self.log_sigma_weight, self.log_sigma_bias))
 
         # if self.training:
