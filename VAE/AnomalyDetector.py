@@ -38,4 +38,5 @@ class AnomalyDetector(nn.Linear, VariationalLayer):
         assert torch.all((targets == 0) | (targets == 1))
         sigma_2 = (torch.ones_like(targets) + ((self.sigma_anomaly-1) * targets)).unsqueeze(1).cuda()
         result = (torch.log(sigma_2) - torch.log(self.sigma) + (self.sigma**2 + self.mu**2)/(2*sigma_2**2) - 0.5)
-        return result.sum() 
+        
+        return result.mean() 
