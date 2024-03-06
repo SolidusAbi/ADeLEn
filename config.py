@@ -1,0 +1,1 @@
+BRATS_DATASET_PATH = '/home/ahguedes/Data/Dataset/BRATS'
