@@ -26,13 +26,14 @@ class Decoder(nn.Module):
     
     def __forward_skip_connection__(self, x: torch.Tensor, skip:list) -> torch.Tensor:
         assert len(skip) == len(self.decode_path)
+        from torch.nn.functional import dropout2d
         for idx, layer in enumerate(self.decode_path[:-1]):
             up, *layers = layer
             x = up(x)
-            x = torch.cat((x, skip[idx]), dim=1)
+            # x = torch.cat((x, skip[idx]), dim=1)
+            x = torch.cat((x, dropout2d(skip[idx], p=.5, training=self.training)), dim=1) # Include dropout to the skip connection
             for layer in layers:
                 x = layer(x)                   
-
         return self.decode_path[-1](x)
     
       
@@ -45,5 +46,5 @@ class Decoder(nn.Module):
         return nn.Sequential(
             nn.Upsample(scale_factor=2, mode='nearest'),
             nn.Conv2d(2*in_channels if skip_connection and activation else in_channels, out_channels, 3, stride=1, padding=1),
-            *(nn.BatchNorm2d(out_channels),nn.Dropout2d(0.2), nn.ReLU()) if activation else (nn.Identity(),)
+            *(nn.BatchNorm2d(out_channels), nn.Dropout2d(0.2), nn.ReLU()) if activation else (nn.Identity(),)
         )
