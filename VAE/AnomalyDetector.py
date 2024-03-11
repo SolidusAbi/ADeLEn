@@ -15,7 +15,10 @@ class AnomalyDetector(nn.Linear, VariationalLayer):
         self.log_sigma_bias = Parameter(torch.Tensor(out_features))
         
         torch.nn.init.xavier_uniform_(self.log_sigma_weight)
-        self.log_sigma_bias.data.fill_(-5)
+        # torch.nn.init.xavier_normal_(self.log_sigma_weight)
+        # self.log_sigma_bias.data.fill_(-5)
+        self.log_sigma_bias.data.fill_(sigma_anomaly)
+
         
         self.sigma_anomaly = sigma_anomaly
         self.mu, self.sigma = None, None

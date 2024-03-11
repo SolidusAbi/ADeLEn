@@ -52,7 +52,7 @@ class SkipConnectionSequential(nn.Sequential):
         for module in self:
             module, down = module[:-1], module[-1]
             x = module(x)
-            sk.append(x.clone())
+            sk.append(x.clone().detach())
             x = down(x)        
         
         sk.reverse()
