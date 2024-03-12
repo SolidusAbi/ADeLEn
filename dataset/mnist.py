@@ -64,7 +64,7 @@ class AnomalyMNIST(Dataset):
         anomaly_idx = torch.where((dataset.targets == 7))[0]
         rnd_perm = torch.randperm(len(anomaly_idx), generator=rng)
 
-        n_unknown_anomalies = int(len(normal_idx)*0.01)
+        n_unknown_anomalies = int(len(normal_idx)*0.001)
 
         normal_idx = torch.cat([normal_idx, anomaly_idx[rnd_perm[:n_unknown_anomalies]]])
         anomaly_idx = anomaly_idx[rnd_perm[n_unknown_anomalies:n_unknown_anomalies+self.n_known_anomalies]]
