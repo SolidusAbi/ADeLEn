@@ -21,6 +21,7 @@ class Encoder(nn.Module, ABC):
         super(Encoder, self).__init__()
 
         encode_path = map(lambda x: self.__encode_module__(*x[1], dropout=True if not to_bottleneck or (x[0] < len(features)-2) else False), enumerate(slide(features, 2)))
+        # encode_path = map(lambda x: self.__encode_module__(*x[1], dropout=True), enumerate(slide(features, 2)))
         self.encode_path = nn.Sequential(*encode_path) if not skip_connection else SkipConnectionSequential(*encode_path)
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:          
