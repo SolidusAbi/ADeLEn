@@ -11,7 +11,7 @@ class AnomalyDataset(Dataset):
         rng = torch.Generator() if not seed else torch.Generator().manual_seed(seed)
         normal_idx, anomaly_idx = self.create_subset(dataset, rng, n_normal_samples, known_anomalies, pollution)
         
-        dataset.targets = -1 * torch.ones(len(dataset.targets))
+        dataset.targets = -1 * np.ones(len(dataset.targets))
         dataset.targets[normal_idx] = 0
         dataset.targets[anomaly_idx] = 1
 
@@ -55,8 +55,6 @@ class AnomalyDataset(Dataset):
         normal_idx = normal_idx[normal_rnd_perm[:samples]] if samples != -1 else normal_idx
         
         n_unknown_anomalies, n_known_anomalies =  int(len(normal_idx) * pollution), int(len(normal_idx) * known_anomalies)
-        print(n_unknown_anomalies, n_known_anomalies)
-
         anomaly_rnd_perm = torch.randperm(len(anomaly_idx), generator=rng)
         anomaly_idx = anomaly_idx[anomaly_rnd_perm[:n_unknown_anomalies + n_known_anomalies]]
         
@@ -72,9 +70,9 @@ class AnomalyDataset(Dataset):
         return self.subset[idx]
     
     def __repr__(self) -> str:
-        return (f"AnomalyMNIST Dataset (Number of samples: {len(self.subset)}, "
+        return (f"{self.__class__.__name__} Dataset (Number of samples: {len(self.subset)}, "
             f"Number of known anomalies: {self.n_known_anomalies}, "
-            f"Number of unknown anomalies: {self.n_pollution}")
+            f"Number of unknown anomalies: {self.n_pollution})")
     
     def montage(self, n_row = 5, n_col= 5, seed=None):
         '''
