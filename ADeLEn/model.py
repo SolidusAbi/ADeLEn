@@ -33,6 +33,13 @@ class ADeLEn(nn.Module):
         x = self.decode_path(x)
         return x
     
+    def save(self, path:str) -> None:
+        torch.save(self.state_dict(), path)
+
+    def load_model(self, path:str) -> None:
+        print(path)
+        self.load_state_dict(torch.load(path))
+
     def __encode_path__(self, channels:list, linear_encoder:list, img_size):
         conv_encoder = ConvEncoder(channels, to_bottleneck=False)
         _out_size = reduce(lambda x, y: x*y, conv_encoder.get_encoded_size(img_size))

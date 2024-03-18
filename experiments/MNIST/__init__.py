@@ -1,2 +1,2 @@
 from .ExperimentFactory import ExperimentFactory, ExperimentType
-from .ExperimentMNISTAnomalies import ExperimentMNISTAnomalies
+from .ExperimentMNIST import ExperimentMNIST
