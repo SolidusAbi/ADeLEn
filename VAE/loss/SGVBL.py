@@ -1,6 +1,6 @@
 from torch import nn
 from torch.nn.functional import cross_entropy
-from .VariationalLayer import VariationalLayer
+from ..nn import VariationalLayer
 
 class SGVBL(nn.Module):
     r''' 

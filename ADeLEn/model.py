@@ -4,7 +4,7 @@ from .encoder import ConvEncoder, LinearEncoder
 from .decoder import ConvDecoder, LinearDecoder
 from .bottleneck import Bottleneck
 from functools import reduce
-from VAE.AnomalyDetector import AnomalyDetector
+from VAE.nn import AnomalyDetector
 
 class ADeLEn(nn.Module):
     '''

@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from VAE.AnomalyDetector import AnomalyDetector 
+from VAE.nn import AnomalyDetector 
 
 from .utils import slide
 
