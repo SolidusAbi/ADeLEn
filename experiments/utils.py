@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import torch
 
+from itertools import chain
 from torch.nn.functional import mse_loss
 from VAE.loss import SGVBL
 
