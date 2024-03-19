@@ -51,11 +51,12 @@ class ExperimentMNISTBase(ExperimentBase):
                 f.write(f'{k}: {v}\n')
 
     
-    def save_model(self):
+    def save_model(self, verbose=True):
         config = self.config()
         path = os.path.join(config['save_model_dir'], config['save_model_name'])
         self.model.save(path)
-        print(f"Model saved to {path}")
+        if verbose:
+            print(f"Model saved to {path}")
 
     def load_model(self, path):
         return self.model.load_model(path)

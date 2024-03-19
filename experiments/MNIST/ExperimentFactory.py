@@ -1,5 +1,7 @@
 from enum import Enum
 
+from .ExperimentMNIST import ExperimentMNIST
+
 class ExperimentType(Enum):
     Anomalies_001 = 0,
     Anomalies_005 = 1,
@@ -12,8 +14,14 @@ class ExperimentType(Enum):
 
 class ExperimentFactory(object):
     @staticmethod
-    def create_experiment(self, experiment: ExperimentType, reg_factor=1):
+    def create(experiment: ExperimentType, seed=None):
         if experiment == ExperimentType.Anomalies_001:
-            pass
+            return ExperimentMNIST(0.01, 0.0, seed)
+        if experiment == ExperimentType.Anomalies_005:
+            return ExperimentMNIST(0.05, 0.0, seed)
+        if experiment == ExperimentType.Anomalies_010:
+            return ExperimentMNIST(0.1, 0.0, seed)
+        if experiment == ExperimentType.Anomalies_020:
+            return ExperimentMNIST(0.2, 0.0, seed)
         else:
             raise NotImplementedError(f'Experiment {experiment} not implemented.')
