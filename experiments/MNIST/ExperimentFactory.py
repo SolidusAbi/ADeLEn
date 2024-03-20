@@ -16,12 +16,12 @@ class ExperimentFactory(object):
     @staticmethod
     def create(experiment: ExperimentType, seed=None):
         if experiment == ExperimentType.Anomalies_001:
-            return ExperimentMNIST(0.01, 0.0, seed)
+            return ExperimentMNIST(0.01, .05, seed)
         if experiment == ExperimentType.Anomalies_005:
-            return ExperimentMNIST(0.05, 0.0, seed)
+            return ExperimentMNIST(0.05, .05, seed)
         if experiment == ExperimentType.Anomalies_010:
-            return ExperimentMNIST(0.1, 0.0, seed)
+            return ExperimentMNIST(0.1, .05, seed)
         if experiment == ExperimentType.Anomalies_020:
-            return ExperimentMNIST(0.2, 0.0, seed)
+            return ExperimentMNIST(0.2, .05, seed)
         else:
             raise NotImplementedError(f'Experiment {experiment} not implemented.')
