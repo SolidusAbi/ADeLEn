@@ -13,7 +13,7 @@ from ..ExperimentBase import ExperimentBase
 
 class ExperimentMNISTBase(ExperimentBase):
     def __init__(self, seed=42) -> None:
-        self.model = ADeLEn((28, 28), [1, 12, 32], [1024, 256, 32], bottleneck=2)
+        self.model = ADeLEn((28, 28), [1, 12, 32], [1024, 256, 32], bottleneck=10)
         self.seed = seed
         super().__init__()
 

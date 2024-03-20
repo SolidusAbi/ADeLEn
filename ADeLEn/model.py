@@ -1,10 +1,14 @@
+import numpy as np
 import torch
+
+from functools import reduce
 from torch import nn
+
 from .encoder import ConvEncoder, LinearEncoder
 from .decoder import ConvDecoder, LinearDecoder
 from .bottleneck import Bottleneck
-from functools import reduce
 from VAE.nn import AnomalyDetector
+
 
 class ADeLEn(nn.Module):
     '''
@@ -39,6 +43,28 @@ class ADeLEn(nn.Module):
     def load_model(self, path:str) -> None:
         print(path)
         self.load_state_dict(torch.load(path))
+
+    def score_samples(self, x:torch.Tensor, normalize=True) -> torch.Tensor:
+        ''' 
+            Compute the score for the samples. The score is the entropy of the 
+            latent space Z.
+
+            Args:
+            -----
+            x: torch.Tensor
+                The samples to be scored.
+
+            normalize: bool
+                If True, the score is normalized by the number of dimensions.
+        '''
+        with torch.no_grad():
+            _ = self.bottleneck(self.encode_path(x))
+            score = torch.log(self.bottleneck.sigma).sum(dim=1).cpu().numpy()
+        if normalize:
+            _, d = self.bottleneck.sigma.shape
+            gauss = d * np.log(2*torch.pi*torch.e)
+            score = .5 * (gauss + score)
+        return score
 
     def __encode_path__(self, channels:list, linear_encoder:list, img_size):
         conv_encoder = ConvEncoder(channels, to_bottleneck=False)
