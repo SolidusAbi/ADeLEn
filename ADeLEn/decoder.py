@@ -59,7 +59,7 @@ class ConvDecoder(Decoder):
         return nn.Sequential(
             nn.Upsample(scale_factor=2, mode='nearest'),
             nn.Conv2d(2*in_channels if skip_connection and activation else in_channels, out_channels, 3, stride=1, padding=1),
-            *(nn.BatchNorm2d(out_channels, affine=False), nn.Dropout2d(0.2), nn.ReLU()) if activation else (nn.Identity(),)
+            *(nn.BatchNorm2d(out_channels, affine=False), nn.Dropout2d(0.1), nn.ReLU()) if activation else (nn.Identity(),)
             # *(nn.BatchNorm2d(out_channels, affine=False), nn.ReLU()) if activation else (nn.Identity(),)
         )
     
@@ -77,6 +77,6 @@ class LinearDecoder(Decoder):
     def __decode_module__(self, in_features, out_features, activation=True, skip_connection=False):
         return nn.Sequential(
             nn.Linear(in_features, out_features, bias=True),
-            *(nn.BatchNorm1d(out_features, affine=False), nn.Dropout(0.2), nn.ReLU()) if activation else (nn.Identity(),)
+            *(nn.BatchNorm1d(out_features, affine=False), nn.Dropout(0.1), nn.ReLU()) if activation else (nn.Identity(),)
             # *(nn.BatchNorm1d(out_features, affine=False), nn.ReLU()) if activation else (nn.Identity(),)
         )
