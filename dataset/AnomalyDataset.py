@@ -7,7 +7,7 @@ class AnomalyDataset(Dataset):
     def __init__(self, dataset, n_normal_samples=-1, known_anomalies=0.2, pollution=0.1, seed=None) -> None:
         super().__init__()
 
-        self.dataset = dataset
+        self.mnist = dataset
         rng = torch.Generator() if not seed else torch.Generator().manual_seed(seed)
         normal_idx, anomaly_idx = self.create_subset(dataset, rng, n_normal_samples, known_anomalies, pollution)
         
