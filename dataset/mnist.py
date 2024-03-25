@@ -1,7 +1,9 @@
-from .AnomalyDataset import AnomalyDataset
 import torch
+
 from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
+
+from .AnomalyDataset import AnomalyDataset
 
 class AnomalyMNIST(AnomalyDataset):
     ''' 

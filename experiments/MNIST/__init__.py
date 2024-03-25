@@ -1,2 +1,3 @@
 from .ExperimentFactory import ExperimentFactory, ExperimentType
-from .ExperimentMNIST import ExperimentMNIST
+from .ExperimentADeLEn import ExperimentADeLEn
+from .ExperimentSVM import ExperimentSVM

@@ -1,6 +1,7 @@
-from matplotlib import pyplot as plt
 import numpy as np
 import torch
+
+from matplotlib import pyplot as plt
 from torch.utils.data import Dataset, Subset
 
 class AnomalyDataset(Dataset):

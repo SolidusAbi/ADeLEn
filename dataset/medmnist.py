@@ -1,5 +1,6 @@
-from .AnomalyDataset import AnomalyDataset
 from medmnist.dataset import PneumoniaMNIST
+
+from .AnomalyDataset import AnomalyDataset
 
 class AnomalyPneumoniaMNIST(AnomalyDataset):
     def __init__(self, root, download=True, transform=None, n_normal_samples=-1, known_anomalies=0.2, pollution=0, seed=None) -> None:

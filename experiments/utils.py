@@ -48,7 +48,9 @@ def generate_roc_df(roc_list:list) -> pd.DataFrame:
         Args:
         -----
             roc_list: list
-                List of N roc curves where N is the number of iterations.
+                List of N roc curves where N is the number of iterations. It is a 
+                list of tuples of the form (fpr, tpr), where fpr is the false positive
+                rate and tpr is the true positive rate.
         Returns:
         --------
             roc_df: pd.DataFrame
@@ -56,7 +58,7 @@ def generate_roc_df(roc_list:list) -> pd.DataFrame:
     '''
     index_names = [
         list(map(lambda x: 'It {}'.format(x), np.repeat(np.arange(len(roc_list)), 2) + 1 )),
-        ['TPR', 'FPR']*len(roc_list)
+        ['FPR', 'TPR']*len(roc_list)
     ]
         
     tuples = list(zip(*index_names))
