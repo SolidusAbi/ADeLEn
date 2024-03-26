@@ -24,7 +24,7 @@ class ExperimentSVM(ExperimentMNISTBase):
     def __init__(self, known_anomalies, pollution, seed=None) -> None:
         self.model = OneClassSVM()
         self.anomalies_percent = 0
-        self.experiment = f'SVM/mnist_pollution_{pollution}'
+        self.experiment = f'SVM/mnist_pollution_{pollution}_anomalies_{known_anomalies}'
         transform = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
         self.train_dataset = AnomalyMNIST('data/', download=True, transform=transform, n_normal_samples=2000, known_anomalies=known_anomalies, pollution=pollution, seed=seed)
         self.test_dataset = self.__prepare_test_dataset__('data/', transform, download=True)
