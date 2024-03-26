@@ -28,15 +28,11 @@ class ExperimentADeLEn(ExperimentMNISTBase):
     '''
 
     def __init__(self, anomalies, pollution, seed=None) -> None:
-        self.model = ADeLEn((28, 28), [1, 12, 32], [1024, 256, 32], bottleneck=10)
+        self.model = ADeLEn((28, 28), [1, 32, 48], [1024, 256, 32], bottleneck=10)
         self.anomalies_percent = anomalies
-        self.experiment = 'mnist_anomalies_{}_pollution_{}'.format(anomalies, pollution)
+        self.experiment = 'ADeLEn/mnist_anomalies_{}_pollution_{}'.format(anomalies, pollution)
 
-        transform = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
-        self.train_dataset = AnomalyMNIST('data/', download=True, transform=transform, n_normal_samples=2000, known_anomalies=anomalies, pollution=pollution, seed=seed)
-        self.test_dataset = self.__prepare_test_dataset__('data/', transform, download=True)
-
-        super().__init__(seed)
+        super().__init__(anomalies, pollution, seed)
           
     def run(self) -> None:
         self.model = train(**self.config())

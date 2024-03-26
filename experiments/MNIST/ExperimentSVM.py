@@ -25,11 +25,8 @@ class ExperimentSVM(ExperimentMNISTBase):
         self.model = OneClassSVM()
         self.anomalies_percent = 0
         self.experiment = f'SVM/mnist_pollution_{pollution}'
-        transform = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
-        self.train_dataset = AnomalyMNIST('data/', download=True, transform=transform, n_normal_samples=2000, known_anomalies=known_anomalies, pollution=pollution, seed=seed)
-        self.test_dataset = self.__prepare_test_dataset__('data/', transform, download=True)
 
-        super().__init__(seed)
+        super().__init__(known_anomalies, pollution, seed)
 
 
     def run(self, verbose=3) -> float:
@@ -150,22 +147,22 @@ class ExperimentSVM(ExperimentMNISTBase):
         x_train, y_train = zip(*self.train_dataset)
         x_train, y_train = np.stack(x_train), np.array(y_train)
 
-        # Using the known anomalies to optimize the SVM model
-        X = x_train.reshape(-1, 28*28)
-        y = y_train
-        test_fold = np.array([-1]*len(x_train))      
-        known_anomalies_idx = np.argwhere(y_train == 1).flatten()
-        test_fold[known_anomalies_idx] = 0
-        normal_idx = np.argwhere(y_train == 0).flatten()
-        idx = np.random.permutation(normal_idx)[:len(known_anomalies_idx)]
-        test_fold[idx] = 0
+        # # Using the known anomalies to optimize the SVM model
+        # X = x_train.reshape(-1, 28*28)
+        # y = y_train
+        # test_fold = np.array([-1]*len(x_train))      
+        # known_anomalies_idx = np.argwhere(y_train == 1).flatten()
+        # test_fold[known_anomalies_idx] = 0
+        # normal_idx = np.argwhere(y_train == 0).flatten()
+        # idx = np.random.permutation(normal_idx)[:len(known_anomalies_idx)]
+        # test_fold[idx] = 0
 
         # Using the 10 percent of the test set to optimize the SVM model
-        # x_test, y_test = self.__get_random_test_subset(percent=.1)
+        x_test, y_test = self.__get_random_test_subset(percent=.1)
 
-        # X = np.concatenate([x_train, x_test], axis=0).reshape(-1, 28*28)
-        # y = np.concatenate([y_train, y_test], axis=0)
-        # test_fold = [-1]*len(x_train) + [0]*len(x_test)
+        X = np.concatenate([x_train, x_test], axis=0).reshape(-1, 28*28)
+        y = np.concatenate([y_train, y_test], axis=0)
+        test_fold = [-1]*len(x_train) + [0]*len(x_test)
 
         
         ps = PredefinedSplit(test_fold)

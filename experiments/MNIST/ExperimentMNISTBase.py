@@ -3,17 +3,21 @@ import numpy as np
 import os
 import torch
 
-from ADeLEn.model import ADeLEn
+from dataset import AnomalyMNIST
 from matplotlib import pyplot as plt
 from torch.utils.data import Subset
 from torchvision.datasets import MNIST
+from torchvision.transforms import Compose, ToTensor, Normalize
 
 from ..ExperimentBase import ExperimentBase
 
 
 class ExperimentMNISTBase(ExperimentBase):
-    def __init__(self, seed=42) -> None:
+    def __init__(self, known_anomalies, pollution, seed=42) -> None:
         self.seed = seed
+        transform = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
+        self.train_dataset = AnomalyMNIST('data/', download=True, transform=transform, n_normal_samples=2000, known_anomalies=known_anomalies, pollution=pollution, seed=seed)
+        self.test_dataset = self.__prepare_test_dataset__('data/', transform, download=True)
         super().__init__()
 
 
@@ -43,6 +47,7 @@ class ExperimentMNISTBase(ExperimentBase):
             'save_model_name': 'model.pt',
         }
     
+
     def save_config(self) -> None:
         config = self.config()
         with open(os.path.join(config['save_dir'], 'config.txt'), 'w') as f:
@@ -57,8 +62,10 @@ class ExperimentMNISTBase(ExperimentBase):
         if verbose:
             print(f"Model saved to {path}")
 
+
     def load_model(self, path):
         return self.model.load_model(path)
+    
     
     def __prepare_test_dataset__(self, root, transform, download=True) -> Subset:
         ''' 
