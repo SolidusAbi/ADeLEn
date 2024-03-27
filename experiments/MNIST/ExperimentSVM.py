@@ -1,11 +1,8 @@
 
 import numpy as np
-import torch
 
-from dataset import AnomalyMNIST
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.svm import OneClassSVM
-from torchvision.transforms import Compose, ToTensor, Normalize
 
 from .ExperimentMNISTBase import ExperimentMNISTBase
 
@@ -29,7 +26,7 @@ class ExperimentSVM(ExperimentMNISTBase):
         super().__init__(known_anomalies, pollution, seed)
 
 
-    def run(self, verbose=3) -> float:
+    def run(self, verbose=0) -> float:
         '''
             Run the experiment
 
@@ -43,43 +40,16 @@ class ExperimentSVM(ExperimentMNISTBase):
                 auc: float
                     The AUC score of the model.
         '''
-        best_params = self.__optimize_svm(verbose=verbose)
+        best_params = self.__optimize_svm__(verbose=verbose)
         self.model = OneClassSVM(**best_params)
         x_train, _ = zip(* self.train_dataset)
         x_train = np.stack(x_train).reshape(-1, 28*28)
         self.model.fit(x_train)
 
-        _, _, auc = self.test()
+        _, _, auc = self.roc_curve()
         return auc
     
-
-    def test(self) -> tuple:
-        '''
-            Test the model with the test dataset
-
-            Returns:
-            --------
-                scores: np.array
-                    The scores of the model
-                fpr: float
-                    False positive rate.
-                tpr: float
-                    True positive rate.
-                roc_auc: float
-                    Area under the curve.
-        '''
-        from sklearn.metrics import roc_curve, auc
-        X, y = zip(*self.test_dataset)
-        X = np.stack(X).reshape(-1, 28*28)
-        y = self.__change_labels(np.array(y))
-
-        scores = self.model.score_samples(X)       
-        fpr, tpr, _ = roc_curve(y, scores)
-        roc_auc = auc(fpr, tpr)
-
-        return (fpr, tpr, roc_auc)
-
-    def test_classification_metrics(self) -> tuple:
+    def classification_metrics(self) -> tuple:
         '''
             Test the model with the test dataset
 
@@ -94,11 +64,9 @@ class ExperimentSVM(ExperimentMNISTBase):
                 f1: float
                     The f1 score of the model.
         '''
-        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+        
 
-        X, y = zip(*self.test_dataset)
-        X = np.stack(X).reshape(-1, 28*28)
-        y = self.__change_labels(np.array(y))
+        X, y = self.__get_test_data__()
         y_pred = self.model.predict(X)
         
         accuracy = accuracy_score(y, y_pred)
@@ -107,7 +75,7 @@ class ExperimentSVM(ExperimentMNISTBase):
         f1 = f1_score(y, y_pred)
         return (accuracy, precision, recall, f1)
 
-    def test_score_samples(self) -> float:
+    def score_per_label(self) -> float:
         '''
             Test the model with the test dataset
 
@@ -118,15 +86,11 @@ class ExperimentSVM(ExperimentMNISTBase):
                 anomaly_scores: np.array
                     The scores of the anomaly samples
         '''
-        X, y = zip(*self.test_dataset)
-        X = np.stack(X).reshape(-1, 28*28)
-        y = np.array(y)
-
-        scores = self.model.score_samples(X)
-        return (scores[y == 0], scores[y == 1])
+        y, scores = self.score_samples()
+        return (scores[y == 1], scores[y == -1])
 
 
-    def __optimize_svm(self, verbose) -> dict:
+    def __optimize_svm__(self, verbose) -> dict:
         '''
             Optimize the SVM model using an unfair advantage of selecting its hyperparameters optimally to maximize AUC
             on a subset (10%) of the test set.
@@ -158,7 +122,7 @@ class ExperimentSVM(ExperimentMNISTBase):
         # test_fold[idx] = 0
 
         # Using the 10 percent of the test set to optimize the SVM model
-        x_test, y_test = self.__get_random_test_subset(percent=.1)
+        x_test, y_test = self.__get_random_test_subset__(percent=.1)
 
         X = np.concatenate([x_train, x_test], axis=0).reshape(-1, 28*28)
         y = np.concatenate([y_train, y_test], axis=0)
@@ -166,18 +130,16 @@ class ExperimentSVM(ExperimentMNISTBase):
 
         
         ps = PredefinedSplit(test_fold)
-        y = self.__change_labels(y)
+        y = self.__change_labels__(y)
 
         param_grid = {'kernel': ['rbf'], 'gamma': np.logspace(-3, 0, 8),
                      'nu': [.01, .05, .1, .2, .5]}
-
         grid = GridSearchCV(OneClassSVM(), param_grid, scoring='roc_auc', verbose=verbose, cv=ps, n_jobs=-1)
-        # grid = GridSearchCV(OneClassSVM(), param_grid, scoring='f1', verbose=verbose, cv=ps, n_jobs=-1)
         grid.fit(X, y)
         return grid.best_params_
 
 
-    def __get_random_test_subset(self, percent=.1):
+    def __get_random_test_subset__(self, percent=.1):
         x_test, y_test = zip(*self.test_dataset)
         x_test, y_test = np.stack(x_test), np.array(y_test)
         n_samples = int(len(y_test) * percent)
@@ -191,7 +153,7 @@ class ExperimentSVM(ExperimentMNISTBase):
         return (x, y)
 
 
-    def __change_labels(self, y:np.array):
+    def __change_labels__(self, y:np.array):
         '''
             Change the labels from [0, 1] to [-1, 1]
 
@@ -206,3 +168,19 @@ class ExperimentSVM(ExperimentMNISTBase):
                 The changed labels
         '''
         return np.where(y == 0, 1, -1)
+
+    def __get_test_data__(self) -> tuple:
+        '''
+            Get the test data
+
+            Returns:
+            --------
+                X: np.array
+                    The test data
+                y: np.array
+                    The labels
+        '''
+        X, y = zip(*self.test_dataset)
+        X = np.stack(X).reshape(-1, 28*28)
+        y = self.__change_labels__(np.array(y))
+        return (X, y)

@@ -24,3 +24,7 @@ class ExperimentBase(ABC):
     @abstractmethod
     def run(self, **kwargs):
         pass
+
+    @abstractmethod
+    def __get_test_data__(self) -> tuple:
+        pass

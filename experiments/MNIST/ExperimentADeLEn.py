@@ -1,11 +1,12 @@
 
 import numpy as np
+import os
 import torch
 
+
 from ADeLEn.model import ADeLEn
-from dataset import AnomalyMNIST
 from matplotlib import pyplot as plt
-from torchvision.transforms import Compose, ToTensor, Normalize
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from .ExperimentMNISTBase import ExperimentMNISTBase
 from ..utils import train
@@ -17,50 +18,74 @@ class ExperimentADeLEn(ExperimentMNISTBase):
 
         Args:
         -----
-        anomalies: float
-            Percentage of known anomalies in the dataset
-
-        pollution: float
-            Percentage of pollution in the dataset
-
-        seed: int
-            Seed for reproducibility
+            anomalies: float
+                Percentage of known anomalies in the dataset
+            pollution: float
+                Percentage of pollution in the dataset
+            d: int
+                Dimension of the bottleneck
+            seed: int
+                Seed for reproducibility
     '''
 
-    def __init__(self, anomalies, pollution, seed=None) -> None:
-        self.model = ADeLEn((28, 28), [1, 32, 48], [1024, 256, 32], bottleneck=10)
-        self.anomalies_percent = anomalies
-        self.experiment = 'ADeLEn/mnist_anomalies_{}_pollution_{}'.format(anomalies, pollution)
+    def __init__(self, known_anomalies, pollution, d=2, seed=None) -> None:
+        self.model = ADeLEn((28, 28), [1, 32, 48], [1024, 256, 32], bottleneck=d)
+        self.anomalies_percent = known_anomalies
+        self.experiment = 'ADeLEn/mnist_anomalies_{}_pollution_{}'.format(known_anomalies, pollution)
 
-        super().__init__(anomalies, pollution, seed)
+        super().__init__(known_anomalies, pollution, seed)
           
+    def config(self) -> dict:
+        base_config = super().config()
+        base_config.update({
+            'batch_size': 128,
+            'n_epochs': 50,
+            'lr': 1e-3,
+            'kl_weight': 1,
+            'save_model_name': 'model.pt'
+        })
+
+        return base_config
+
     def run(self) -> None:
         self.model = train(**self.config())
 
+        _, _, auc = self.roc_curve()
+        return auc
+    
+    def save_model(self, verbose=True):
+        config = self.config()
+        path = os.path.join(config['save_model_dir'], config['save_model_name'])
+        self.model.save(path)
+        if verbose:
+            print(f"Model saved to {path}")
+
+    def load_model(self, path):
+        return self.model.load_model(path)
 
     def plot_reconstructed(self, model:ADeLEn, r0=(-6, 6), r1=(-6, 6), n=15):
         ''' 
-            Plot the reconstructed images from the bottleneck.
+            Plot the reconstructed images from the bottleneck. It only works with 
+            2-dimensoinal bottlenecks.
 
             Args:
             -----
-            model: ADeLEn
-                The model to be used for reconstruction
-
-            r0: tuple
-                Range for the first dimension
-
-            r1: tuple
-                Range for the second dimension
-
-            n: int
-                Number of points to be sampled
+                model: ADeLEn
+                    The model to be used for reconstruction
+                r0: tuple
+                    Range for the first dimension
+                r1: tuple
+                    Range for the second dimension
+                n: int
+                    Number of points to be sampled
 
             Returns:
             --------
-            matplotlib.figure.Figure
-                The figure with the reconstructed images
+                matplotlib.figure.Figure
+                    The figure with the reconstructed images
         '''
+        if model.bottleneck.out_features != 2:
+            raise ValueError("The bottleneck dimension must be 2")
         
         w = 28
         img = np.zeros((n*w, n*w))
@@ -81,29 +106,84 @@ class ExperimentADeLEn(ExperimentMNISTBase):
 
         return fig
     
-    def to_test(self):
+    def roc_curve(self):
+        '''
+            Obtain the ROC curve of the model with the test dataset.
+
+            Returns:
+            --------
+                tpr: float
+                    True positive rate.
+                fpr: float
+                    False positive rate.
+                roc_auc: float
+                    Area under the curve.
+        '''
+        from sklearn.metrics import roc_curve, auc
+        X, y = self.__get_test_data__()
+
+        scores = self.model.score_samples(X)               
+        fpr, tpr, _ = roc_curve(y, scores)
+        roc_auc = auc(fpr, tpr)
+
+        return (fpr, tpr, roc_auc)
+    
+    def classification_metrics(self, sigma=1.2) -> tuple:
         '''
             Test the model with the test dataset
 
             Returns:
             --------
-            tpr: float
-                True positive rate.
-            fpr: float
-                False positive rate.
-            roc_auc: float
-                Area under the curve.
+                accuracy: float
+                    The accuracy of the model.
+                precision: float
+                    The precision of the model.
+                recall: float
+                    The recall of the model.
+                f1: float
+                    The f1 score of the model.
         '''
-        from sklearn.metrics import roc_curve, auc
-        x, y = zip(*[(_x, _y) for _x, _y in self.test_dataset])
-        x = torch.stack(x)
-        y = torch.tensor(y)
-
-        _ = self.model(x)
-        sigma = self.model.bottleneck.sigma
-        y_score = torch.sum(sigma, dim=1).detach().numpy()
+        y, scores = self.score_samples()
+        y_pred = np.where(scores > self._theshold(sigma), 1, 0)
         
-        fpr, tpr, _ = roc_curve(y, y_score)
-        roc_auc = auc(fpr, tpr)
+        accuracy = accuracy_score(y, y_pred)
+        precision = precision_score(y, y_pred)
+        recall = recall_score(y, y_pred)
+        f1 = f1_score(y, y_pred)
+        return (accuracy, precision, recall, f1)
+    
+    def score_per_label(self) -> float:
+        '''
+            Test the model with the test dataset
 
-        return (tpr, fpr, roc_auc)
+            Returns:
+            --------
+                normal_scores: np.array
+                    The scores of the normal samples
+                anomaly_scores: np.array
+                    The scores of the anomaly samples
+        '''
+        y, scores = self.score_samples()
+        return (scores[y == 0], scores[y == 1])
+
+    def _theshold(self, sigma)->float:
+        d = self.model.bottleneck.out_features
+        score = d * np.log(sigma)
+        gauss = d * np.log(2*torch.pi*torch.e)
+        return .5 * (gauss + score)
+    
+    def __get_test_data__(self) -> tuple:
+        '''
+            Get the test data
+
+            Returns:
+            --------
+                X: np.array
+                    The test data
+                y: np.array
+                    The labels
+        '''
+        X, y = zip(*self.test_dataset)
+        X = torch.stack(X)
+        y = torch.tensor(y)
+        return (X, y)

@@ -3,14 +3,13 @@ import numpy as np
 import os
 import torch
 
+from abc import abstractmethod
 from dataset import AnomalyMNIST
-from matplotlib import pyplot as plt
 from torch.utils.data import Subset
 from torchvision.datasets import MNIST
 from torchvision.transforms import Compose, ToTensor, Normalize
 
 from ..ExperimentBase import ExperimentBase
-
 
 class ExperimentMNISTBase(ExperimentBase):
     def __init__(self, known_anomalies, pollution, seed=42) -> None:
@@ -34,38 +33,60 @@ class ExperimentMNISTBase(ExperimentBase):
             'dataset_dir': './data/',
             'model': self.model,
             'train_dataset': self.train_dataset,
-            'batch_size': 128,
-            'n_epochs': 50,
-            'lr': 1e-3,
-            'kl_weight': 1,
             'seed': self.seed,
             'save_dir': result_dir,
-            'save_result': True,
             'save_result_dir': os.path.join(result_dir, 'result'),
             'save_imgs_dir': os.path.join(result_dir, 'imgs'),
             'save_model_dir': os.path.join(result_dir, 'model'),
-            'save_model_name': 'model.pt',
         }
     
-
     def save_config(self) -> None:
         config = self.config()
         with open(os.path.join(config['save_dir'], 'config.txt'), 'w') as f:
             for k, v in config.items():
                 f.write(f'{k}: {v}\n')
-
     
-    def save_model(self, verbose=True):
-        config = self.config()
-        path = os.path.join(config['save_model_dir'], config['save_model_name'])
-        self.model.save(path)
-        if verbose:
-            print(f"Model saved to {path}")
+    # def classification_metrics(self, **kwargs) -> tuple:
 
 
-    def load_model(self, path):
-        return self.model.load_model(path)
+    def roc_curve(self):
+        '''
+            Obtain the ROC curve of the model with the test dataset.
+
+            Returns:
+            --------
+                tpr: float
+                    True positive rate.
+                fpr: float
+                    False positive rate.
+                roc_auc: float
+                    Area under the curve.
+        '''
+        from sklearn.metrics import roc_curve, auc
+        y, scores = self.score_samples()
+        fpr, tpr, _ = roc_curve(y, scores)
+        roc_auc = auc(fpr, tpr)
+
+        return (fpr, tpr, roc_auc)
+
+    def score_samples(self) -> float:
+        '''
+            Obtain the scores of the samples and the labels.
+
+            Returns:
+            --------
+                labels: 
+                    label of the samples
+                scores: np.array
+                    The scores of the samples by the model
+        '''
+        X, y = self.__get_test_data__()
+        scores = self.model.score_samples(X)
+        return (y, scores)
     
+    @abstractmethod
+    def classification_metrics(self, **kwargs) -> tuple:
+        pass
     
     def __prepare_test_dataset__(self, root, transform, download=True) -> Subset:
         ''' 
