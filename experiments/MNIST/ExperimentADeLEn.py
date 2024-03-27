@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from .ExperimentMNISTBase import ExperimentMNISTBase
-from ..utils import train
+from ..utils.ADeLEn import train
 
 
 class ExperimentADeLEn(ExperimentMNISTBase):
@@ -42,6 +42,7 @@ class ExperimentADeLEn(ExperimentMNISTBase):
             'n_epochs': 50,
             'lr': 1e-3,
             'kl_weight': 1,
+            'weighted_sampler': False,
             'save_model_name': 'model.pt'
         })
 

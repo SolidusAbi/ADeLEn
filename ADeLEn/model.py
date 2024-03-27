@@ -41,7 +41,6 @@ class ADeLEn(nn.Module):
         torch.save(self.state_dict(), path)
 
     def load_model(self, path:str) -> None:
-        print(path)
         self.load_state_dict(torch.load(path))
 
     def score_samples(self, x:torch.Tensor, normalize=True) -> torch.Tensor:
