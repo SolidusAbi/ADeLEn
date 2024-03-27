@@ -31,7 +31,7 @@ class ExperimentADeLEn(ExperimentMNISTBase):
     def __init__(self, known_anomalies, pollution, d=2, seed=None) -> None:
         self.model = ADeLEn((28, 28), [1, 32, 48], [1024, 256, 32], bottleneck=d)
         self.anomalies_percent = known_anomalies
-        self.experiment = 'ADeLEn/mnist_anomalies_{}_pollution_{}'.format(known_anomalies, pollution)
+        self.experiment = 'ADeLEn/mnist_anomalies_{}_pollution_{}_bottleneck_{}'.format(known_anomalies, pollution, d)
 
         super().__init__(known_anomalies, pollution, seed)
           
