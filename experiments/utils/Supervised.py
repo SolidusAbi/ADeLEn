@@ -51,10 +51,10 @@ class SupervisedModel(nn.Module):
         #     y_hat = torch.softmax(self.model(X), dim=1)
         # return y_hat[:, 1]
         with torch.no_grad():
-            return self.model(X)
+            return torch.sigmoid(self.model(X).flatten())
     
 
-def train(model, train_dataset, batch_size, n_epochs, lr=1e-3, weighted_sampler=False):
+def train(model, train_dataset, batch_size, n_epochs, lr=1e-3, weighted_sampler=False, **kwargs):
     from tqdm import tqdm
     from torch.utils.data import DataLoader
     from torch.optim import Adam
@@ -71,7 +71,7 @@ def train(model, train_dataset, batch_size, n_epochs, lr=1e-3, weighted_sampler=
 
     epoch_iterator = tqdm(
             range(n_epochs),
-            leave=True,
+            leave=False,
             unit="epoch",
             postfix={"tls": "%.4f" % -1},
         )

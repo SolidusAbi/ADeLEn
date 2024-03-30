@@ -18,7 +18,7 @@ class ExperimentSVM(ExperimentMNISTBase):
             seed: int
                 Seed for reproducibility
     '''
-    def __init__(self, known_anomalies, pollution, seed=None) -> None:
+    def __init__(self, known_anomalies, pollution, seed=None, **kwargs) -> None:
         self.model = OneClassSVM()
         self.anomalies_percent = 0
         self.experiment = f'SVM/mnist_pollution_{pollution}'

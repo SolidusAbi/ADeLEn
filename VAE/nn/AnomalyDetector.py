@@ -24,7 +24,6 @@ class AnomalyDetector(nn.Linear, VariationalLayer):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         mu = F.linear(x, self.weight, self.bias) 
-        # sigma = torch.exp(F.linear(x, self.log_sigma_weight, self.log_sigma_bias))
         sigma = torch.exp(0.5 * F.linear(x, self.log_sigma_weight, self.log_sigma_bias))
 
         # if self.training:

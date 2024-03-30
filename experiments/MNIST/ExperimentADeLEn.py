@@ -28,10 +28,10 @@ class ExperimentADeLEn(ExperimentMNISTBase):
                 Seed for reproducibility
     '''
 
-    def __init__(self, known_anomalies, pollution, d=2, seed=None) -> None:
+    def __init__(self, known_anomalies, pollution, d=2, seed=None, **kwargs) -> None:
         self.model = ADeLEn((28, 28), [1, 32, 48], [1024, 256, 32], bottleneck=d)
         self.anomalies_percent = known_anomalies
-        self.experiment = 'ADeLEn/mnist_anomalies_{}_pollution_{}_bottleneck_{}'.format(known_anomalies, pollution, d)
+        self.experiment = 'ADeLEn/{}/mnist_anomalies_{}_pollution_{}'.format(d, known_anomalies, pollution)
 
         super().__init__(known_anomalies, pollution, seed)
           
@@ -62,6 +62,8 @@ class ExperimentADeLEn(ExperimentMNISTBase):
             print(f"Model saved to {path}")
 
     def load_model(self, path):
+        config = self.config()
+        path = os.path.join(config['save_model_dir'], config['save_model_name'])
         return self.model.load_model(path)
 
     def plot_reconstructed(self, model:ADeLEn, r0=(-6, 6), r1=(-6, 6), n=15):
@@ -106,28 +108,6 @@ class ExperimentADeLEn(ExperimentMNISTBase):
         plt.imshow(img, extent=[*r0, *r1], cmap='viridis')
 
         return fig
-    
-    def roc_curve(self):
-        '''
-            Obtain the ROC curve of the model with the test dataset.
-
-            Returns:
-            --------
-                tpr: float
-                    True positive rate.
-                fpr: float
-                    False positive rate.
-                roc_auc: float
-                    Area under the curve.
-        '''
-        from sklearn.metrics import roc_curve, auc
-        X, y = self.__get_test_data__()
-
-        scores = self.model.score_samples(X)               
-        fpr, tpr, _ = roc_curve(y, scores)
-        roc_auc = auc(fpr, tpr)
-
-        return (fpr, tpr, roc_auc)
     
     def classification_metrics(self, sigma=1.2) -> tuple:
         '''

@@ -93,8 +93,8 @@ class ConvEncoder(Encoder):
         '''
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, stride=1, padding=1),
-            nn.BatchNorm2d(out_channels),
-            *(nn.Dropout2d(0.5), nn.ReLU()) if dropout else (nn.ReLU(),),   
+            nn.BatchNorm2d(out_channels, affine=True),
+            *(nn.Dropout2d(0.2), nn.ReLU()) if dropout else (nn.ReLU(),),   
             nn.MaxPool2d(3, stride=2, padding=1)
         )
 
@@ -131,6 +131,6 @@ class LinearEncoder(Encoder):
     def __encode_module__(self, in_features, out_features, dropout=True):
         return nn.Sequential(
             nn.Linear(in_features, out_features, bias=True),
-            nn.BatchNorm1d(out_features),
+            nn.BatchNorm1d(out_features, affine=True),
             *(nn.Dropout(0.5), nn.ReLU()) if dropout else (nn.ReLU(),)
         )

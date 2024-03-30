@@ -45,9 +45,6 @@ class ExperimentMNISTBase(ExperimentBase):
         with open(os.path.join(config['save_dir'], 'config.txt'), 'w') as f:
             for k, v in config.items():
                 f.write(f'{k}: {v}\n')
-    
-    # def classification_metrics(self, **kwargs) -> tuple:
-
 
     def roc_curve(self):
         '''

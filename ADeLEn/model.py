@@ -57,8 +57,8 @@ class ADeLEn(nn.Module):
                 If True, the score is normalized by the number of dimensions.
         '''
         with torch.no_grad():
-            _ = self.bottleneck(self.encode_path(x))
-            score = torch.log(self.bottleneck.sigma).sum(dim=1).cpu().numpy()
+            _ = self.bottleneck(self.encode_path(x.detach()))
+            score = torch.log(self.bottleneck.sigma.detach()).sum(dim=1).cpu().numpy()
         if normalize:
             _, d = self.bottleneck.sigma.shape
             gauss = d * np.log(2*torch.pi*torch.e)
