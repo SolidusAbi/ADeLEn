@@ -1,2 +1,4 @@
 from .ExperimentMedMNISTBase import ExperimentMedMNISTBase
 from .ExperimentADeLEn import ExperimentADeLEn
+from .ExperimentSupervised import ExperimentSupervised
+from .ExperimentSVM import ExperimentSVM

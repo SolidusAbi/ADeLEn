@@ -4,14 +4,14 @@ import torch
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-from .ExperimentMNISTBase import ExperimentMNISTBase
+from .ExperimentMedMNISTBase import ExperimentMedMNISTBase
 from ..utils.Supervised import SupervisedModel, train
 
-class ExperimentSupervised(ExperimentMNISTBase):
+class ExperimentSupervised(ExperimentMedMNISTBase):
     def __init__(self, known_anomalies, pollution, seed=None, **kwargs) -> None:
         self.model = SupervisedModel((28, 28), [1, 16, 24], [1024, 256, 32])
         self.anomalies_percent = known_anomalies
-        self.experiment = 'Supervised/mnist_anomalies_{}_pollution_{}'.format(known_anomalies, pollution)
+        self.experiment = 'Supervised/medmnist_anomalies_{}_pollution_{}'.format(known_anomalies, pollution)
 
         super().__init__(known_anomalies, pollution, seed)
 
@@ -96,7 +96,5 @@ class ExperimentSupervised(ExperimentMNISTBase):
         '''
         X, y = zip(*self.test_dataset)
         X = torch.stack(X)
-        y = torch.tensor(y)
+        y = torch.tensor(np.array(y).flatten())
         return (X, y)
-    
-    
