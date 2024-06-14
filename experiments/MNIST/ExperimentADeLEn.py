@@ -125,7 +125,7 @@ class ExperimentADeLEn(ExperimentMNISTBase):
                     The f1 score of the model.
         '''
         y, scores = self.score_samples()
-        y_pred = np.where(scores > self._theshold(sigma), 1, 0)
+        y_pred = np.where(scores > self._threshold(sigma), 1, 0)
         
         accuracy = accuracy_score(y, y_pred)
         precision = precision_score(y, y_pred)
@@ -147,7 +147,7 @@ class ExperimentADeLEn(ExperimentMNISTBase):
         y, scores = self.score_samples()
         return (scores[y == 0], scores[y == 1])
 
-    def _theshold(self, sigma)->float:
+    def _threshold(self, sigma)->float:
         d = self.model.bottleneck.out_features
         score = d * np.log(sigma)
         gauss = d * np.log(2*torch.pi*torch.e)
