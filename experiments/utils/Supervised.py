@@ -77,7 +77,6 @@ def train(model, train_dataset, batch_size, n_epochs, lr=1e-3, weighted_sampler=
         )
     
     opt = Adam(model.parameters(), lr=lr)
-    # ce = nn.CrossEntropyLoss()
     ce = nn.BCEWithLogitsLoss()
     for _ in epoch_iterator:
         epoch_loss = 0.
