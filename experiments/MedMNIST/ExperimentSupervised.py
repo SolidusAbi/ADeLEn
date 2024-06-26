@@ -9,7 +9,7 @@ from ..utils.Supervised import SupervisedModel, train
 
 class ExperimentSupervised(ExperimentMedMNISTBase):
     def __init__(self, known_anomalies, pollution, seed=None, **kwargs) -> None:
-        self.model = SupervisedModel((28, 28), [1, 16, 24], [1024, 256, 32])
+        self.model = SupervisedModel((28, 28), [1, 32, 48], [1024, 256, 32])
         self.anomalies_percent = known_anomalies
         self.experiment = 'Supervised/medmnist_anomalies_{}_pollution_{}'.format(known_anomalies, pollution)
 

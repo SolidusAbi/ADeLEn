@@ -51,7 +51,7 @@ class SupervisedModel(nn.Module):
         #     y_hat = torch.softmax(self.model(X), dim=1)
         # return y_hat[:, 1]
         with torch.no_grad():
-            return torch.sigmoid(self.model(X).flatten())
+            return torch.sigmoid(self.model(X.detach()).flatten())
     
 
 def train(model, train_dataset, batch_size, n_epochs, lr=1e-3, weighted_sampler=False, **kwargs):
@@ -92,5 +92,7 @@ def train(model, train_dataset, batch_size, n_epochs, lr=1e-3, weighted_sampler=
             opt.step()
 
         epoch_iterator.set_postfix(tls="%.3f" % (epoch_loss/len(train_loader)))
+    opt.zero_grad()
+    
 
     return model.eval().cpu()
