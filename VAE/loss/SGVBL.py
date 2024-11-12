@@ -1,8 +1,9 @@
 from torch import nn
 from torch.nn.functional import cross_entropy
+from torch.nn.modules.loss import _Loss
 from ..nn import VariationalLayer
 
-class SGVBL(nn.Module):
+class SGVBL(_Loss):
     r''' 
         Stochastic Gradient Variational Bayes (SGVB) Loss function.
         More details in https://arxiv.org/pdf/1506.02557.pdf and https://arxiv.org/pdf/1312.6114.pdf
