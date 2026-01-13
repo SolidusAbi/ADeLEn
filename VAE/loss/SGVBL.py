@@ -1,19 +1,23 @@
-from torch import nn
+import math
+
+import torch
 from torch.nn.functional import cross_entropy
 from torch.nn.modules.loss import _Loss
+
 from ..nn import VariationalLayer
 
-class SGVBL(_Loss):
-    r''' 
-        Stochastic Gradient Variational Bayes (SGVB) Loss function.
-        More details in https://arxiv.org/pdf/1506.02557.pdf and https://arxiv.org/pdf/1312.6114.pdf
 
-        Parameters
-        ----------
-            model: model to train
-            train_size: size of the training dataset
-            mle: maximum likelihood estimation loss function
-    '''
+class SGVBL(_Loss):
+    r"""
+    Stochastic Gradient Variational Bayes (SGVB) Loss function.
+    More details in https://arxiv.org/pdf/1506.02557.pdf and https://arxiv.org/pdf/1312.6114.pdf
+
+    Parameters
+    ----------
+        model: model to train
+        train_size: size of the training dataset
+        mle: maximum likelihood estimation loss function
+    """
 
     def __init__(self, model, train_size, mle=cross_entropy):
         super(SGVBL, self).__init__()
@@ -31,16 +35,18 @@ class SGVBL(_Loss):
         kl = 0.0
         for layer in self.variational_layers:
             kl += layer.kl_reg(target)
-            
-        return self.train_size * (self.loss(input, output, reduction='mean') + kl_weight * kl)
 
-import math, torch
+        return self.train_size * (
+            self.loss(input, output, reduction="mean") + kl_weight * kl
+        )
+
+
 def cosine_scheduler(timesteps, s=8e-3):
-    r'''
-        Cosine scheduler for the regularization factor.
-    '''
+    r"""
+    Cosine scheduler for the regularization factor.
+    """
     steps = timesteps + 1
     x = torch.linspace(0, timesteps, steps)
-    alphas_cumprod = torch.cos(((x/timesteps)+s) / (1+s) * math.pi * .5) ** 2
+    alphas_cumprod = torch.cos(((x / timesteps) + s) / (1 + s) * math.pi * 0.5) ** 2
     alphas_cumprod = alphas_cumprod / alphas_cumprod[0]
     return 1 - alphas_cumprod

@@ -1,1 +1,3 @@
-from .SGVBL import SGVBL 
+from .SGVBL import SGVBL
+
+__all__ = ["SGVBL"]

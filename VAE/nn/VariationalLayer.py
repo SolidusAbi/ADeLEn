@@ -1,10 +1,16 @@
 from abc import ABC, abstractmethod
 
+from torch import Tensor
+
+
 class VariationalLayer(ABC):
-    r'''
-        Abstract base class for variational models which is mandatory definces
-        the KL divergence.
-    '''
+    """
+    Abstract base class for variational models which is mandatory definces
+    the KL divergence and the reparameterization trick methods.
+    """
+
     @abstractmethod
-    def kl_reg(self):
-        pass
+    def _reparameterization(self, *args, **kwargs) -> Tensor: ...
+
+    @abstractmethod
+    def kl_reg(self, *args, **kwargs) -> Tensor: ...
